@@ -1,6 +1,7 @@
 import base64
 import json
 import re
+from os import getenv
 from pathlib import Path
 
 import pytest
@@ -30,8 +31,13 @@ TEST_DATA_DIR = Path(__file__).parent / "test_data"
 
 postgres = PostgresContainer(f"postgres:{POSTGRES_TAG}", name=DB_CONTAINER_NAME)
 edumfa = DockerContainer(f"ghcr.io/edumfa/edumfa:{EDUMFA_TAG}")
-radius_image = DockerImage(path=".").build()
-radius = DockerContainer(str(radius_image))
+
+radius_image = None
+radius_image_tag = getenv("EDUMFA_RADIUS_TEST_IMAGE")
+if not radius_image_tag:
+    radius_image = DockerImage(path=".").build()
+    radius_image_tag = str(radius_image)
+radius = DockerContainer(radius_image_tag)
 
 
 def bashify_command(cmd: str) -> str:
@@ -47,10 +53,22 @@ def bashify_command(cmd: str) -> str:
     return f'bash -c "echo -n {cmd_b64} | base64 -d | bash -s"'
 
 
+def try_stop_containers():
+    """Try to stop containers to avoid them lingering on e.g. failure."""
+    containers = (radius, edumfa, postgres)
+    for container in containers:
+        try:
+            container.stop()
+        except:
+            pass
+
+
 @pytest.fixture(scope="module", autouse=True)
 def remove_built_image(request):
     def _remove_built_image() -> None:
-        radius_image.remove()
+        if not getenv("EDUMFA_RADIUS_TEST_IMAGE"):
+            radius_image.remove()
+        try_stop_containers()
 
     request.addfinalizer(_remove_built_image)
 
@@ -102,6 +120,7 @@ def setup(request):
     edumfa.exec(add_policy_cmd)
 
     # RADIUS setup
+    radius.with_name("edumfa-radius")
     radius.with_volume_mapping(
         str(TEST_DATA_DIR / "clients.conf"), "/etc/freeradius/3.0/clients.conf"
     )
@@ -113,9 +132,7 @@ def setup(request):
     radius.start()
 
     def remove_objects() -> None:
-        radius.stop()
-        edumfa.stop()
-        postgres.stop()
+        try_stop_containers()
         network.remove()
 
     request.addfinalizer(remove_objects)

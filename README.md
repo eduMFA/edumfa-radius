@@ -19,7 +19,10 @@ TODO for upstream
 
 ## Run tests
 
-`uv run --with-requirements tests/requirements.txt pytest`
+`uv run --with-requirements tests/requirements.txt pytest`  
+To use your own build of edumfa-radius, you can set it as a environment
+variable: `EDUMFA_RADIUS_TEST_IMAGE="mynamespace/myrepo:mytag" uv run [..]`
+
 
 ## eduMFA update
 If there is a new eduMFA version released, do:
