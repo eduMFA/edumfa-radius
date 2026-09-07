@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+# SPDX-License-Identifier: CC0-1.0
+
+python3 edumfa_radius {
+    module = edumfa_radius
+    python_path = "/usr/share/edumfa/freeradius"
+    
+    mod_instantiate = ${.module}
+    func_instantiate = instantiate
+    
+    mod_authenticate = ${.module}
+    func_authenticate = authenticate
+    
+    config {
+      # The "/validate/check" endpoint of your eduMFA instance (required).
+      url = https://localhost/validate/check
+      # Whether to verify the TLS certificate.
+      ssl_check = true
+      # Force a certain realm instead of the one passed by the request.
+      #realm = someRealm
+      # Which attribute of the RADIUS request to use for the "client" parameter to
+      # eduMFA. Default is NAS-IP-Address and if not given the source IP address.
+      #clientattribute = someAttribute
+      # Whether to pass an empty password to eduMFA if no password was given.
+      add_empty_pass = false
+      # Compatibility option: only use the password string until the NULL byte.
+      pass_split_null_byte = false
+    }
+}

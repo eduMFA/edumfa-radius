@@ -1,0 +1,65 @@
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+# SPDX-License-Identifier: CC0-1.0
+
+name: "edumfa-radius-example"
+
+services:
+  mariadb:
+    image: docker.io/mariadb:11.8
+    restart: always
+    volumes:
+      - mariadb-data:/var/lib/mysql:rw
+    environment:
+      MARIADB_DATABASE: ${MARIADB_DATABASE}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
+      MARIADB_USER: ${MARIADB_USER}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  edumfa:
+    # See the documentation on how to configure eduMFA for Docker. This service
+    # definition is simplified.
+    image: ghcr.io/edumfa/edumfa:v2.9.5
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - edumfa-keys:/etc/edumfa/:rw
+    environment:
+      DB_DATABASE: ${MARIADB_DATABASE}
+      DB_DRIVER: mysql+pymysql
+      DB_HOSTNAME: mariadb
+      DB_PASSWORD: ${MARIADB_PASSWORD}
+      DB_USER: ${MARIADB_USER}
+      EDUMFA_PEPPER: ${EDUMFA_PEPPER}
+      SECRET_KEY: ${EDUMFA_SECRET_KEY}
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
+  edumfa-radius:
+    build: ../..
+    restart: always
+    read_only: true
+    # If you don't want to lose the IP as an authentication factor, see
+    # clients.conf. You might want to use this:
+    #network_mode: host
+    ports:
+      - "1812:1812/udp"
+    volumes:
+      - ./mod_config.unlang:/etc/freeradius/3.0/mods-available/edumfa:ro
+      - ./clients.conf:/etc/freeradius/3.0/clients.conf:ro
+    environment:
+      RADIUS_DEBUG: ${RADIUS_DEBUG}
+    depends_on:
+      edumfa:
+        condition: service_healthy
+
+volumes:
+  edumfa-keys:
+  mariadb-data:

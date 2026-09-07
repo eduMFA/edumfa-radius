@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+# SPDX-License-Identifier: CC0-1.0
+
+python3 edumfa_radius {
+    module = edumfa_radius
+    python_path = "/usr/share/edumfa/freeradius"
+    
+    mod_instantiate = ${.module}
+    func_instantiate = instantiate
+    
+    mod_authenticate = ${.module}
+    func_authenticate = authenticate
+    
+    config {
+      url = http://edumfa:8000/validate/check
+      ssl_check = false
+    }
+}

@@ -1,0 +1,36 @@
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+# SPDX-License-Identifier: CC0-1.0
+
+server {
+    listen {
+        type = auth
+        ipaddr = *
+        port = 0
+    }
+    authorize {
+        update request {
+            # Add the Packet Src IP to the request as client fallback
+            Packet-Src-IP-Address = "%{Packet-Src-IP-Address}"
+        }
+        update control {
+            Auth-Type := edumfa
+        }
+    }
+    authenticate {
+        Auth-Type edumfa {
+            # "Normally, when a module fails, the entire section [..] stops
+            # being processed."
+            # https://wiki.freeradius.org/config/Fail-over
+            # rlm_python3 does not support returning a challenge, so instead we
+            # return HANDLED and transform it here into Access-Challenge.
+            # TODO: Patch rlm_python3 upstream to have RLM_MODULE_CHALLENGE so
+            #       this is no longer necessary.
+            edumfa_radius {
+                handled = 1
+            }
+            if (handled) {
+                challenge
+            }
+        }
+    }
+}

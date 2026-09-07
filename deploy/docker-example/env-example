@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+# SPDX-License-Identifier: CC0-1.0
+
+## eduMFA docker config (simplified)
+MARIADB_USER="edumfa"
+MARIADB_PASSWORD="pass"
+MARIADB_DATABASE="edumfa"
+MARIADB_ROOT_PASSWORD="rootpass"
+EDUMFA_SECRET_KEY="Secret-Use-Your-Own-Values-Please"
+EDUMFA_PEPPER="Never know..."
+
+## RADIUS image config
+RADIUS_DEBUG="false"
