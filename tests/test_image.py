@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+
 import base64
 import json
 import re
