@@ -121,6 +121,8 @@ def setup(request):
 
     # RADIUS setup
     radius.with_name("edumfa-radius")
+    radius_env = {"RADIUS_DEBUG": "true"}
+    radius.with_envs(**radius_env)
     radius.with_volume_mapping(
         str(TEST_DATA_DIR / "clients.conf"), "/etc/freeradius/3.0/clients.conf"
     )
