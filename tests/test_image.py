@@ -76,10 +76,13 @@ def remove_built_image(request):
     request.addfinalizer(_remove_built_image)
 
 
-@pytest.fixture(scope="function", autouse=True)
-def setup(request):
+def _setup_with_network(request, network):
+    """Helper function for function setup which enables readable try-excepting.
+
+    :param request: The pytest request for the test function.
+    :param network: The testcontainers network to use for the containers.
+    """
     # Network setup
-    network = Network()
     network.create()
     postgres.with_network(network)
     edumfa.with_network(network)
@@ -136,10 +139,20 @@ def setup(request):
     radius.waiting_for(LogMessageWaitStrategy(r".*Ready to process requests"))
     radius.start()
 
+
+@pytest.fixture(scope="function", autouse=True)
+def setup(request):
+    network = Network()
+
     def remove_objects() -> None:
         try_stop_containers()
         network.remove()
 
+    try:
+        _setup_with_network(request, network)
+    except:
+        remove_objects()
+        raise
     request.addfinalizer(remove_objects)
 
 
