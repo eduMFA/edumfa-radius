@@ -14,8 +14,8 @@ from testcontainers.core.image import DockerImage
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 
-EDUMFA_TAG = "2.9.5"
-POSTGRES_TAG = "17-alpine"
+EDUMFA_TAG = "2.9.5@sha256:fe9867f6a7fa7e2269c44305c7954d3ae35765bd54bcc6fdac7294f2881ceac7"
+POSTGRES_TAG = "17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73"
 OTPKEY = "3132333435363738393031323334353637383930"
 VALID_OTP_VALUES = [
     "755224",
