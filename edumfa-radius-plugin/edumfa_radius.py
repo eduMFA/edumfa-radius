@@ -10,7 +10,9 @@
 # For questions please mail to info@daasi.de
 #######################################################################
 
-VERSION="0.0.1"
+# Dear user, please use a non-develop version. You can select a tag on the upper
+# left drop-down.
+VERSION="develop"
 
 import json
 import re
