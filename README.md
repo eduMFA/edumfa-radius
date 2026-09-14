@@ -57,7 +57,8 @@ The version numbers follow [semantic versioning](https://semver.org/).
    `ln -s /etc/freeradius/3.0/sites-available/edumfa /etc/freeradius/3.0/sites-enabled/edumfa`
 4. Copy
    [edumfa-radius-plugin/edumfa_radius.py](edumfa-radius-plugin/edumfa_radius.py)
-   to `/usr/share/edumfa/freeradius/edumfa_radius.py`. If you prefer a different
+   (don't forget to select the version you want) to
+   `/usr/share/edumfa/freeradius/edumfa_radius.py`. If you prefer a different
    path, edit the `python_path` in the module config.
 5. Don't forget to configure your clients (`/etc/freeradius/3.0/clients.conf`).
 
@@ -113,3 +114,4 @@ OS and FreeRADIUS updates in the image are handled by daily rebuilds.
 - Run the tests.
 3. After the "Release Prozess für didmos", make sure the pipeline runs
    successfully.
+4. Set the version number in the above two files back to "develop".
