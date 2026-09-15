@@ -43,6 +43,9 @@ services:
         condition: service_healthy
 
   edumfa-radius:
+    # In an actual deployment, this would be
+    # image: ghcr.io/daasi-bot/edumfa-radius-test:x.y.z
+    # instead.
     build: ../..
     restart: always
     read_only: true
@@ -55,6 +58,7 @@ services:
       - ./mod_config.unlang:/etc/freeradius/3.0/mods-available/edumfa:ro
       - ./clients.conf:/etc/freeradius/3.0/clients.conf:ro
     environment:
+      # This enables FreeRADIUS debug output if set to "true".
       RADIUS_DEBUG: ${RADIUS_DEBUG}
     depends_on:
       edumfa:

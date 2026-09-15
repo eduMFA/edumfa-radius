@@ -5,8 +5,8 @@ FROM debian:trixie
 
 LABEL org.opencontainers.image.authors="DAASI International GmbH"
 LABEL org.opencontainers.image.url="https://gitlab.daasi.de/edumfa/edumfa-radius"
-LABEL org.opencontainers.image.version="0.0.1"
-LABEL org.opencontainers.image.licenses="Apache-2.0"
+LABEL org.opencontainers.image.source="https://github.com/eduMFA/edumfa-radius"
+# CI sets org.opencontainers.image.version
 
 # Install system dependencies
 RUN apt-get update && \

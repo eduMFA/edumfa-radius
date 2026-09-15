@@ -1,6 +1,10 @@
+# SPDX-License-Identifier: Apache-2.0
+# SPDX-FileCopyrightText: 2026 DAASI International GmbH <info@daasi.de>
+
 import base64
 import json
 import re
+from os import getenv
 from pathlib import Path
 
 import pytest
@@ -10,8 +14,8 @@ from testcontainers.core.image import DockerImage
 from testcontainers.core.network import Network
 from testcontainers.core.wait_strategies import LogMessageWaitStrategy
 
-EDUMFA_TAG = "2.9.5"
-POSTGRES_TAG = "17-alpine"
+EDUMFA_TAG = "2.9.5@sha256:fe9867f6a7fa7e2269c44305c7954d3ae35765bd54bcc6fdac7294f2881ceac7"
+POSTGRES_TAG = "17-alpine@sha256:18cfe3ef5e6815560c98237d6216d1e5119702fb0f3894c8785dd58b8bbe5d73"
 OTPKEY = "3132333435363738393031323334353637383930"
 VALID_OTP_VALUES = [
     "755224",
@@ -30,8 +34,13 @@ TEST_DATA_DIR = Path(__file__).parent / "test_data"
 
 postgres = PostgresContainer(f"postgres:{POSTGRES_TAG}", name=DB_CONTAINER_NAME)
 edumfa = DockerContainer(f"ghcr.io/edumfa/edumfa:{EDUMFA_TAG}")
-radius_image = DockerImage(path=".").build()
-radius = DockerContainer(str(radius_image))
+
+radius_image = None
+radius_image_tag = getenv("EDUMFA_RADIUS_TEST_IMAGE")
+if not radius_image_tag:
+    radius_image = DockerImage(path=".").build()
+    radius_image_tag = str(radius_image)
+radius = DockerContainer(radius_image_tag)
 
 
 def bashify_command(cmd: str) -> str:
@@ -47,18 +56,33 @@ def bashify_command(cmd: str) -> str:
     return f'bash -c "echo -n {cmd_b64} | base64 -d | bash -s"'
 
 
+def try_stop_containers():
+    """Try to stop containers to avoid them lingering on e.g. failure."""
+    containers = (radius, edumfa, postgres)
+    for container in containers:
+        try:
+            container.stop()
+        except:
+            pass
+
+
 @pytest.fixture(scope="module", autouse=True)
 def remove_built_image(request):
     def _remove_built_image() -> None:
-        radius_image.remove()
+        if not getenv("EDUMFA_RADIUS_TEST_IMAGE"):
+            radius_image.remove()
+        try_stop_containers()
 
     request.addfinalizer(_remove_built_image)
 
 
-@pytest.fixture(scope="function", autouse=True)
-def setup(request):
+def _setup_with_network(request, network):
+    """Helper function for function setup which enables readable try-excepting.
+
+    :param request: The pytest request for the test function.
+    :param network: The testcontainers network to use for the containers.
+    """
     # Network setup
-    network = Network()
     network.create()
     postgres.with_network(network)
     edumfa.with_network(network)
@@ -102,6 +126,9 @@ def setup(request):
     edumfa.exec(add_policy_cmd)
 
     # RADIUS setup
+    radius.with_name("edumfa-radius")
+    radius_env = {"RADIUS_DEBUG": "true"}
+    radius.with_envs(**radius_env)
     radius.with_volume_mapping(
         str(TEST_DATA_DIR / "clients.conf"), "/etc/freeradius/3.0/clients.conf"
     )
@@ -112,12 +139,20 @@ def setup(request):
     radius.waiting_for(LogMessageWaitStrategy(r".*Ready to process requests"))
     radius.start()
 
+
+@pytest.fixture(scope="function", autouse=True)
+def setup(request):
+    network = Network()
+
     def remove_objects() -> None:
-        radius.stop()
-        edumfa.stop()
-        postgres.stop()
+        try_stop_containers()
         network.remove()
 
+    try:
+        _setup_with_network(request, network)
+    except:
+        remove_objects()
+        raise
     request.addfinalizer(remove_objects)
 
 
