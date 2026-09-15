@@ -111,7 +111,9 @@ OS and FreeRADIUS updates in the image are handled by daily rebuilds.
   `edumfa-radius-plugin/edumfa_radius.py`
 - Update the versions in `tests/requirements.txt`.
 - Run the tests.
-3. The version label of the image is set by the CI automatically.
-4. After the "Release Prozess für didmos", make sure the pipeline runs
-   successfully.
-5. Set the version number in the above file back to "develop".
+3. After the "Release Prozess für didmos", start the pipeline
+   "nightly-edumfa-radius" with the corresponding tag.
+- Make sure it runs successfully.
+- Check if the image appears in the
+  [GHCR](https://ghcr.io/edumfa/edumfa-radius).
+4. Set the version number in the above file back to "develop".
