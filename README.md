@@ -107,11 +107,11 @@ OS and FreeRADIUS updates in the image are handled by daily rebuilds.
 
 1. Follow the "Release Prozess für didmos" article in the Wiki.
 2. In the "changelog step":
-- Update the version number in the following files:
-  + `Dockerfile`
-  + `edumfa-radius-plugin/edumfa_radius.py`
+- Update the version number in the following file:
+  `edumfa-radius-plugin/edumfa_radius.py`
 - Update the versions in `tests/requirements.txt`.
 - Run the tests.
-3. After the "Release Prozess für didmos", make sure the pipeline runs
+3. The version label of the image is set by the CI automatically.
+4. After the "Release Prozess für didmos", make sure the pipeline runs
    successfully.
-4. Set the version number in the above two files back to "develop".
+5. Set the version number in the above file back to "develop".
