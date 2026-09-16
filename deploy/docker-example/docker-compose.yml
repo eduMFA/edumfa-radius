@@ -44,7 +44,7 @@ services:
 
   edumfa-radius:
     # In an actual deployment, this would be
-    # image: ghcr.io/daasi-bot/edumfa-radius-test:x.y.z
+    # image: ghcr.io/edumfa/edumfa-radius:vx.y.z
     # instead.
     build: ../..
     restart: always
