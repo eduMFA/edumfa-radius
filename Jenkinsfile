@@ -147,5 +147,36 @@ pipeline {
         }
       }
     }
+    failure {
+      emailext(
+        to: env.RESULT_MAIL,
+        from: 'jenkins@daasi.de',
+        subject: "eduMFA RADIUS Nightly Build FAILED - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        mimeType: 'text/html',
+        body: """
+          <p>Build <b>FAILED</b>.</p>
+          <p>Job: <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b></p>
+          <p>
+            <a href="${env.BUILD_URL}">Open Jenkins build</a>
+          </p>
+        """
+     )
+   }
+
+    unstable {
+      emailext(
+       to: env.RESULT_MAIL,
+       from: 'jenkins@daasi.de',
+       subject: "eduMFA RADIUS Nightly Build UNSTABLE - ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+       mimeType: 'text/html',
+       body: """
+         <p>Build is <b>UNSTABLE</b>.</p>
+         <p>Job: <b>${env.JOB_NAME} #${env.BUILD_NUMBER}</b></p>
+         <p>
+           <a href="${env.BUILD_URL}">Open Jenkins build</a>
+         </p>
+        """
+      )
+    }
   }
 }
